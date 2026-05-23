@@ -1,0 +1,77 @@
+# ============================================================
+# .gitignore — Raízes do Nordeste API (.NET 8 / ASP.NET Core)
+# ============================================================
+
+# ----- Configurações locais e segredos (NUNCA subir) --------
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+*.env
+.env
+secrets.json
+
+# ----- Build e compilação -----------------------------------
+[Bb]in/
+[Oo]bj/
+out/
+build/
+
+# ----- Visual Studio ----------------------------------------
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+.vscode/settings.json
+
+# ----- Pacotes NuGet ----------------------------------------
+*.nupkg
+*.snupkg
+[Pp]ackages/
+NuGet.Config
+
+# ----- Entity Framework -------------------------------------
+# (migrations são versionadas, mas arquivos de snapshot local não precisam ir)
+# Descomente a linha abaixo SOMENTE se não quiser versionar migrations:
+# Migrations/
+
+# ----- Logs e temporários -----------------------------------
+*.log
+*.tmp
+*.temp
+Logs/
+log/
+
+# ----- Cobertura de testes ----------------------------------
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+# ----- Publicação / deploy ----------------------------------
+publish/
+*.publish.xml
+
+# ----- Certificados e chaves --------------------------------
+*.pfx
+*.p12
+*.cer
+*.key
+
+# ----- Docker -----------------------------------------------
+# (manter Dockerfile e docker-compose, ignorar apenas overrides locais)
+docker-compose.override.yml
+
+# ----- macOS ------------------------------------------------
+.DS_Store
+.AppleDouble
+
+# ----- Windows ----------------------------------------------
+Thumbs.db
+Desktop.ini
+
+# ----- JetBrains (Rider) ------------------------------------
+.idea/
+*.iml

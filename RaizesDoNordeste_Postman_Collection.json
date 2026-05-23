@@ -1,0 +1,421 @@
+{
+  "info": {
+    "name": "Raízes do Nordeste — API Back-End",
+    "description": "Coleção de testes para o Projeto Multidisciplinar (Trilha Back-End) — UNINTER 2026.\n\nFluxo recomendado:\n1. Execute 'Registrar usuário (Cliente)'\n2. Execute 'Login válido' e copie o accessToken\n3. Configure a variável {{token}} com o valor copiado\n4. Siga os demais cenários em ordem",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7001",
+      "description": "URL base da API. Ajuste a porta conforme aparecer no terminal ao rodar 'dotnet run'."
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Cole aqui o accessToken retornado pelo endpoint de login."
+    },
+    {
+      "key": "clienteId",
+      "value": "",
+      "description": "ID do cliente criado no registro. Preencha após o cadastro."
+    },
+    {
+      "key": "unidadeId",
+      "value": "",
+      "description": "ID de uma unidade existente no banco."
+    },
+    {
+      "key": "produtoId",
+      "value": "",
+      "description": "ID de um produto existente no banco."
+    },
+    {
+      "key": "pedidoId",
+      "value": "",
+      "description": "ID do pedido criado. Preenchido automaticamente após 'Criar pedido'."
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Cenários de autenticação e autorização",
+      "item": [
+        {
+          "name": "T01 - Registrar usuário (Cliente)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Nordeste\",\n  \"email\": \"maria@exemplo.com\",\n  \"senha\": \"Senha@123\",\n  \"perfil\": \"Cliente\",\n  \"consentimentoLGPD\": true\n}"
+            }
+          },
+          "response": [],
+          "_postman_previewlanguage": "json",
+          "description": "T01 | POSITIVO\nEndpoint: POST /auth/register\nPré-condição: nenhuma\nEsperado: 201 + dados do usuário criado\nEvidência: usuário cadastrado com consentimento LGPD registrado"
+        },
+        {
+          "name": "T02 - Login válido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.accessToken);",
+                  "    console.log('Token salvo:', json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@exemplo.com\",\n  \"senha\": \"Senha@123\"\n}"
+            }
+          },
+          "response": [],
+          "description": "T02 | POSITIVO\nEndpoint: POST /auth/login\nPré-condição: usuário cadastrado (T01)\nEsperado: 200 + accessToken + tokenType Bearer\nObs: o token é salvo automaticamente na variável {{token}}"
+        },
+        {
+          "name": "T03 - Login com credenciais inválidas",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@exemplo.com\",\n  \"senha\": \"senhaErrada\"\n}"
+            }
+          },
+          "response": [],
+          "description": "T03 | NEGATIVO\nEndpoint: POST /auth/login\nPré-condição: usuário cadastrado (T01)\nEsperado: 401 + error: CREDENCIAIS_INVALIDAS\nVerifica: padrão de erro padronizado"
+        },
+        {
+          "name": "T04 - Acesso sem token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] }
+          },
+          "response": [],
+          "description": "T04 | NEGATIVO\nEndpoint: GET /pedidos\nPré-condição: nenhum token no header\nEsperado: 401 Unauthorized\nVerifica: proteção JWT em endpoints privados"
+        },
+        {
+          "name": "T05 - Registro sem consentimento LGPD (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Teste Sem Consentimento\",\n  \"email\": \"teste_lgpd@exemplo.com\",\n  \"senha\": \"Senha@123\",\n  \"perfil\": \"Cliente\",\n  \"consentimentoLGPD\": false\n}"
+            }
+          },
+          "response": [],
+          "description": "T05 | NEGATIVO\nEndpoint: POST /auth/register\nPré-condição: nenhuma\nEsperado: 400 + error: CONSENTIMENTO_LGPD_NECESSARIO\nVerifica: obrigatoriedade do consentimento LGPD"
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "description": "Cenários de criação e gestão de pedidos",
+      "item": [
+        {
+          "name": "T06 - Criar pedido (fluxo principal)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('pedidoId', json.pedidoId);",
+                  "    console.log('Pedido criado:', json.pedidoId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"Totem\",\n  \"formaPagamento\": \"Mock\",\n  \"pontosResgatar\": 0,\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 2\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "description": "T06 | POSITIVO\nEndpoint: POST /pedidos\nPré-condição: usuário autenticado, clienteId/unidadeId/produtoId preenchidos, estoque disponível\nEsperado: 201 + pedidoId + status Aguardando + canalPedido: Totem\nVerifica: fluxo principal de criação de pedido com multicanalidade"
+        },
+        {
+          "name": "T07 - Listar pedidos filtrados por canal",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos?canalPedido=Totem&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"],
+              "query": [
+                { "key": "canalPedido", "value": "Totem" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          },
+          "response": [],
+          "description": "T07 | POSITIVO\nEndpoint: GET /pedidos?canalPedido=Totem\nPré-condição: pedido criado via Totem (T06)\nEsperado: 200 + lista com total, page, limit e data[]\nVerifica: filtro por canal (requisito de multicanalidade)"
+        },
+        {
+          "name": "T08 - Atualizar status do pedido (EmPreparo → Pronto)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoId}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Pronto\"\n}"
+            }
+          },
+          "response": [],
+          "description": "T08 | POSITIVO\nEndpoint: PATCH /pedidos/{id}/status\nPré-condição: pedido existente com status EmPreparo\nEsperado: 200 + status: Pronto\nVerifica: transição de status pelo fluxo da cozinha"
+        },
+        {
+          "name": "T09 - Criar pedido com produto inexistente (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"App\",\n  \"formaPagamento\": \"Mock\",\n  \"pontosResgatar\": 0,\n  \"itens\": [\n    {\n      \"produtoId\": \"00000000-0000-0000-0000-000000000000\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "description": "T09 | NEGATIVO\nEndpoint: POST /pedidos\nPré-condição: usuário autenticado\nEsperado: 404 + error: PRODUTO_NAO_ENCONTRADO\nVerifica: validação de produto inexistente"
+        },
+        {
+          "name": "T10 - Criar pedido sem informar canalPedido (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"formaPagamento\": \"Mock\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "description": "T10 | NEGATIVO\nEndpoint: POST /pedidos\nPré-condição: usuário autenticado\nEsperado: 422 + error: VALIDACAO_INVALIDA + details com campo canalPedido\nVerifica: obrigatoriedade do campo canalPedido"
+        }
+      ]
+    },
+    {
+      "name": "Pagamentos",
+      "description": "Cenários de pagamento mock",
+      "item": [
+        {
+          "name": "T11 - Processar pagamento mock (aprovado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pagamentos", "host": ["{{baseUrl}}"], "path": ["pagamentos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pedidoId\": \"{{pedidoId}}\",\n  \"simularAprovacao\": true\n}"
+            }
+          },
+          "response": [],
+          "description": "T11 | POSITIVO\nEndpoint: POST /pagamentos\nPré-condição: pedido criado (T06) com status Aguardando\nEsperado: 200 + status: Aprovado + pedido atualizado para EmPreparo + pontos acumulados\nVerifica: fluxo completo pagamento mock aprovado"
+        },
+        {
+          "name": "T12 - Processar pagamento mock (recusado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pagamentos", "host": ["{{baseUrl}}"], "path": ["pagamentos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pedidoId\": \"{{pedidoId}}\",\n  \"simularAprovacao\": false\n}"
+            }
+          },
+          "response": [],
+          "description": "T12 | NEGATIVO\nEndpoint: POST /pagamentos\nPré-condição: pedido criado com status Aguardando (novo pedido)\nEsperado: 200 + status: Recusado + pedido atualizado para Cancelado\nVerifica: cenário de pagamento negado e impacto no status do pedido"
+        },
+        {
+          "name": "T13 - Consultar pagamento por pedido",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/pagamentos/{{pedidoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pagamentos", "{{pedidoId}}"]
+            }
+          },
+          "response": [],
+          "description": "T13 | POSITIVO\nEndpoint: GET /pagamentos/{pedidoId}\nPré-condição: pagamento processado (T11)\nEsperado: 200 + detalhes do pagamento com provedor MockPay\nVerifica: consulta de pagamento registrado"
+        }
+      ]
+    },
+    {
+      "name": "Estoque",
+      "description": "Cenários de controle de estoque por unidade",
+      "item": [
+        {
+          "name": "T14 - Consultar estoque por unidade",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/estoque?unidadeId={{unidadeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["estoque"],
+              "query": [{ "key": "unidadeId", "value": "{{unidadeId}}" }]
+            }
+          },
+          "response": [],
+          "description": "T14 | POSITIVO\nEndpoint: GET /estoque?unidadeId={id}\nPré-condição: usuário com perfil Gerente ou Admin autenticado\nEsperado: 200 + lista de estoques com alertas\nVerifica: consulta de estoque por unidade"
+        },
+        {
+          "name": "T15 - Movimentar estoque (entrada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/estoque/movimentar", "host": ["{{baseUrl}}"], "path": ["estoque", "movimentar"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"produtoId\": \"{{produtoId}}\",\n  \"quantidade\": 50,\n  \"motivo\": \"Reposição semanal de estoque\"\n}"
+            }
+          },
+          "response": [],
+          "description": "T15 | POSITIVO\nEndpoint: POST /estoque/movimentar\nPré-condição: usuário Gerente/Admin autenticado, unidade e produto existentes\nEsperado: 200 + novo saldo do estoque\nVerifica: entrada de estoque com registro de auditoria"
+        }
+      ]
+    },
+    {
+      "name": "Fidelidade",
+      "description": "Cenários de programa de pontos",
+      "item": [
+        {
+          "name": "T16 - Consultar saldo de pontos do cliente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/fidelidade/{{clienteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["fidelidade", "{{clienteId}}"]
+            }
+          },
+          "response": [],
+          "description": "T16 | POSITIVO\nEndpoint: GET /fidelidade/{clienteId}\nPré-condição: cliente existente, pagamento aprovado (T11) para acúmulo de pontos\nEsperado: 200 + saldoPontos + equivalenteReais\nVerifica: acúmulo correto de pontos após pagamento aprovado"
+        },
+        {
+          "name": "T17 - Consultar saldo de cliente inexistente (404)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/fidelidade/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["fidelidade", "00000000-0000-0000-0000-000000000000"]
+            }
+          },
+          "response": [],
+          "description": "T17 | NEGATIVO\nEndpoint: GET /fidelidade/{clienteId}\nPré-condição: ID inválido/inexistente\nEsperado: 404 + error: CLIENTE_NAO_ENCONTRADO\nVerifica: tratamento de recurso não encontrado"
+        }
+      ]
+    },
+    {
+      "name": "Erros e Validações",
+      "description": "Cenários negativos adicionais para cobertura de erros",
+      "item": [
+        {
+          "name": "T18 - Pedido com body vazio (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": [],
+          "description": "T18 | NEGATIVO\nEndpoint: POST /pedidos\nPré-condição: usuário autenticado\nEsperado: 422 + error: VALIDACAO_INVALIDA + lista de campos obrigatórios\nVerifica: validação de campos obrigatórios no body"
+        },
+        {
+          "name": "T19 - Cancelar pedido já entregue (409)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoId}}"]
+            }
+          },
+          "response": [],
+          "description": "T19 | NEGATIVO\nEndpoint: DELETE /pedidos/{id}\nPré-condição: pedido com status Entregue\nEsperado: 409 + error: CANCELAMENTO_INVALIDO\nVerifica: regra de negócio — pedido entregue não pode ser cancelado"
+        },
+        {
+          "name": "T20 - Estoque insuficiente ao criar pedido (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pedidos", "host": ["{{baseUrl}}"], "path": ["pedidos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"App\",\n  \"formaPagamento\": \"Mock\",\n  \"pontosResgatar\": 0,\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 99999\n    }\n  ]\n}"
+            }
+          },
+          "response": [],
+          "description": "T20 | NEGATIVO\nEndpoint: POST /pedidos\nPré-condição: usuário autenticado, produto com estoque menor que 99999\nEsperado: 409 + error: ESTOQUE_INSUFICIENTE + details com quantidade disponível\nVerifica: bloqueio de venda por estoque insuficiente"
+        }
+      ]
+    }
+  ]
+}
