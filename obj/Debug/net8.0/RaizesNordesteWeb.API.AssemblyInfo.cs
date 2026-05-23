@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RaizesNordesteWeb.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ef7b534a1578a032e66273516bc0ca7deb32eacf")]
 [assembly: System.Reflection.AssemblyProductAttribute("RaizesNordesteWeb.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RaizesNordesteWeb.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
