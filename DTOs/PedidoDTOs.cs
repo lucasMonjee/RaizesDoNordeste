@@ -3,8 +3,7 @@ using static RaizesNordesteWeb.API.Models.Enums;
 
 namespace RaizesNordesteWeb.API.DTOs
 {
-    // ─── REQUEST ────────────────────────────────────────────────────────────────
-
+    //REQUEST 
     public class CriarPedidoRequest
     {
         [Required(ErrorMessage = "O canalPedido é obrigatório.")]
@@ -42,7 +41,7 @@ namespace RaizesNordesteWeb.API.DTOs
         public StatusPedido Status { get; set; }
     }
 
-    // ─── RESPONSE ───────────────────────────────────────────────────────────────
+    //RESPONSE 
 
     public class PedidoResponse
     {

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RaizesNordesteWeb.API.DTOs
 {
-    // ─── REQUEST ────────────────────────────────────────────────────────────────
+    // REQUEST 
 
     public class MovimentarEstoqueRequest
     {
@@ -21,7 +21,7 @@ namespace RaizesNordesteWeb.API.DTOs
         public string? Motivo { get; set; }
     }
 
-    // ─── RESPONSE ───────────────────────────────────────────────────────────────
+    //RESPONSE 
 
     public class EstoqueResponse
     {

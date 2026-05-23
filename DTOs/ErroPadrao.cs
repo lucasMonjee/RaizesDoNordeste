@@ -1,9 +1,6 @@
 namespace RaizesNordesteWeb.API.DTOs
 {
-    /// <summary>
-    /// Padrão de resposta de erro para todos os endpoints da API.
-    /// Garante consistência no formato de erro (requisito do roteiro).
-    /// </summary>
+
     public class ErroPadrao
     {
         public string Error { get; set; } = string.Empty;

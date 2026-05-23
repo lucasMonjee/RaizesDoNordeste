@@ -18,7 +18,7 @@
             Totem,
             Balcao,
             PickUp,
-            Web       // canal web adicionado conforme requisito de multicanalidade
+            Web       
         }
 
         public enum StatusPagamento
@@ -29,7 +29,7 @@
             Estornado
         }
 
-        // Formas de pagamento suportadas (MOCK = simulado para fins acadêmicos)
+        // Aqui são os Mocks para o pagamento
         public enum FormaPagamento
         {
             Mock,

@@ -3,7 +3,7 @@ using static RaizesNordesteWeb.API.Models.Enums;
 
 namespace RaizesNordesteWeb.API.DTOs
 {
-    // ─── REQUEST ────────────────────────────────────────────────────────────────
+    // REQUEST 
 
     public class LoginRequest
     {
@@ -39,7 +39,7 @@ namespace RaizesNordesteWeb.API.DTOs
         public bool ConsentimentoLGPD { get; set; } = false;
     }
 
-    // ─── RESPONSE ───────────────────────────────────────────────────────────────
+    // ─── RESPONSE 
 
     public class AuthResponse
     {
@@ -55,6 +55,5 @@ namespace RaizesNordesteWeb.API.DTOs
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Perfil { get; set; } = string.Empty;
-        // SenhaHash NUNCA é retornada (LGPD — dados sensíveis não expostos)
     }
 }

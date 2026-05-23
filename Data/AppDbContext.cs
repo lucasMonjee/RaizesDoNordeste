@@ -114,7 +114,7 @@ namespace RaizerNordesteWeb.API.Data
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // --- EstoqueUnidade — chave composta ---
+            // --- EstoqueUnidade 
             modelBuilder.Entity<EstoqueUnidade>(e =>
             {
                 e.HasKey(es => new { es.UnidadeId, es.ProdutoId });

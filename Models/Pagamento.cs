@@ -17,7 +17,7 @@ namespace RaizesNordesteWeb.API.Models
 
         public StatusPagamento Status { get; set; } = StatusPagamento.Pendente;
 
-        // Nome do provedor externo (ex: "PagSeguro", "Stripe", "Cielo")
+        // Aqui Seria o provedor tipo pagSeguro Etc...
         [MaxLength(100)]
         public string Provedor { get; set; } = string.Empty;
 

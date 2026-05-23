@@ -2,8 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RaizesNordesteWeb.API.DTOs
 {
-    // ─── REQUEST ────────────────────────────────────────────────────────────────
-
+    //REQUEST 
     public class ProcessarPagamentoRequest
     {
         [Required]
@@ -16,8 +15,7 @@ namespace RaizesNordesteWeb.API.DTOs
         public bool SimularAprovacao { get; set; } = true;
     }
 
-    // ─── RESPONSE ───────────────────────────────────────────────────────────────
-
+    //RESPONSE 
     public class PagamentoResponse
     {
         public Guid PagamentoId { get; set; }

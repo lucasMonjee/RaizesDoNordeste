@@ -19,10 +19,8 @@ namespace RaizesNordesteWeb.API.Models
         [ForeignKey(nameof(ClienteId))]
         public Cliente Cliente { get; set; } = null!;
 
-        /// <summary>
         /// Verifica se há saldo suficiente e debita os pontos.
         /// Retorna false se saldo insuficiente.
-        /// </summary>
         public bool Resgatar(int pontos)
         {
             if (Saldo < pontos) return false;

@@ -15,6 +15,7 @@ namespace RaizesNordesteWeb.API.Controllers
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {
+        
         private readonly AppDbContext _db;
         private readonly IConfiguration _config;
 
@@ -24,7 +25,7 @@ namespace RaizesNordesteWeb.API.Controllers
             _config = config;
         }
 
-        /// <summary>Autentica um usuário e retorna o token JWT.</summary>
+        ///Autentica um usuário e retorna o token JWT.
         [HttpPost("login")]
         [ProducesResponseType(typeof(AuthResponse), 200)]
         [ProducesResponseType(typeof(ErroPadrao), 400)]
@@ -63,7 +64,7 @@ namespace RaizesNordesteWeb.API.Controllers
             });
         }
 
-        /// <summary>Registra um novo usuário (cadastro público para clientes).</summary>
+        /// Registra um novo usuário (cadastro público para clientes).
         [HttpPost("register")]
         [ProducesResponseType(typeof(UsuarioResponse), 201)]
         [ProducesResponseType(typeof(ErroPadrao), 400)]
@@ -118,7 +119,7 @@ namespace RaizesNordesteWeb.API.Controllers
             });
         }
 
-        // ─── Helpers ────────────────────────────────────────────────────────────
+        //Helpers 
 
         private string GerarToken(Usuario usuario)
         {
@@ -150,11 +151,7 @@ namespace RaizesNordesteWeb.API.Controllers
 
         private ErroPadrao CriarErroValidacao(string path)
         {
-            var detalhes = ModelState
-                .Where(m => m.Value?.Errors.Count > 0)
-                .SelectMany(m => m.Value!.Errors.Select(e =>
-                    new DetalheErro { Field = m.Key, Issue = e.ErrorMessage }))
-                .ToList();
+            var detalhes = ModelState.Where(m => m.Value?.Errors.Count > 0).SelectMany(m => m.Value!.Errors.Select(e =>new DetalheErro { Field = m.Key, Issue = e.ErrorMessage })).ToList();
 
             return ErroPadrao.Criar("VALIDACAO_INVALIDA",
                 "Um ou mais campos estão incorretos.", path, detalhes);
